@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Apply for tournament{% endblock %}
+
+{% block menu %}
+{% if tournament_status == 0 or tournament_status == 1 or tournament_status == 2 %}
+    {% if tournament.number_of_participants > 0 %}
+        <a class="nav-link" href="/participants">Участники</a>
+    {% endif %}
+{% endif %}
+{% if tournament_status == 1 or tournament_status == 2 %}
+    <a class="nav-link" href="/games">Игры</a>
+    <a class="nav-link" href="/rating">Рейтинг</a>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<p class="lead">
+    Предстоящий турнир: </br>
+    {{ tournament }}
+</p>
+{% if is_registered %}
+    <p class="lead">
+    Вы зарегистрированы
+    </p>
+{% else %}
+    <form action="{% url 'me_register' %}" method="post">
+        {% csrf_token %}
+        <input type="submit" value="Зарегистрироваться" class="btn btn-secondary">
+    </form>
+{% endif %}
+{% endblock %}

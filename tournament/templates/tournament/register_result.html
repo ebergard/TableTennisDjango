@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Register{% endblock %}
+
+{% block menu %}
+{% if tournament_status == 0 or tournament_status == 1 or tournament_status == 2 %}
+    {% if tournament.number_of_participants > 0  %}
+        <a class="nav-link" href="/participants">Участники</a>
+    {% endif %}
+{% endif %}
+{% if tournament_status == 1 or tournament_status == 2 %}
+    <a class="nav-link" href="/games">Игры</a>
+    <a class="nav-link" href="/rating">Рейтинг</a>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<h2 class="cover-heading">
+    {% if success %}
+        Спасибо за заявку!
+        <p class="lead">
+            Дальнейшая информация будет доступна на сайте после окончания регистрации.
+        </p>
+    {% else %}
+        Вы уже зарегистрированы
+    {% endif %}
+</h2>
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Ping-Pong AT{% endblock %}
+
+{% block menu %}
+{% if tournament_status == 0 or tournament_status == 1 or tournament_status == 2 %}
+    {% if tournament.number_of_participants > 0 %}
+        <a class="nav-link" href="/participants">Участники</a>
+    {% endif %}
+{% endif %}
+{% if tournament_status == 1 or tournament_status == 2 %}
+    <a class="nav-link" href="/games">Игры</a>
+    <a class="nav-link" href="/rating">Рейтинг</a>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<h2 class="cover-heading">
+    {{ msg }}
+    {% if tournament_status == 0 %}
+        <p class="lead">
+            Даты проведения: {{ tournament }} <br>
+            Окончание регистрации: {{ tournament.reg_end | date:"H:i, d F Y" }}
+        </p>
+        <p class="lead">
+            Подать заявку можно через <a class="badge badge-light" href="/accounts/me/register/">личный кабинет</a>
+        </p>
+    {% endif %}
+    {% if tournament_status == 1 %}
+        <p class="lead">
+            Даты проведения: {{ tournament }} <br>
+            Жеребьёвка: {{ tournament.draw_time | date:"H:i, d F Y" }} в теннисной
+        </p>
+    {% endif %}
+    {% if tournament_status == 2 %}
+        <p class="lead">
+            Количество участников: {{ tournament.number_of_participants }}
+        </p>
+    {% endif %}
+</h2>
+{% endblock %}

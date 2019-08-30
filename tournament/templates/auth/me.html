@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Register account{% endblock %}
+
+{% block menu %}
+{% if tournament_status == 0 or tournament_status == 1 or tournament_status == 2 %}
+    {% if tournament.number_of_participants > 0  %}
+        <a class="nav-link" href="/participants">Участники</a>
+    {% endif %}
+{% endif %}
+{% if tournament_status == 1 or tournament_status == 2 %}
+    <a class="nav-link" href="/games">Игры</a>
+    <a class="nav-link" href="/rating">Рейтинг</a>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<h3 class="cover-heading">Мои игры:</h3>
+<p>
+<table class="table table-dark">
+    <tbody>
+    {% for g in games %}
+        <form action="{% url 'me_game' g.id %}" method="post">
+        {% csrf_token %}
+        {{ g.form.non_field_errors }}
+        <tr>
+            <th scope="row">{{ g.game_date }}</th>
+            <td>{{ g.start_time|time:'H:i' }}</td>
+            <td>{{ g.get_p1 }}</td>
+            <td>
+                {% if g.setresult_set.all %}
+                    <table style="width: 100%; align:justify;"><tr>
+                    {% for r in g.setresult_set.all %}
+                        <td style="width: 20%; border: 0px">
+                            {{ r.result1 }}
+                        </td>
+                    {% endfor %}
+                    </tr></table>
+                {% else %}
+                    <div class="form-group">
+                        {{ g.form.set1res1.errors }}
+                        {{ g.form.set2res1.errors }}
+                        {{ g.form.set3res1.errors }}
+                        {{ g.form.set4res1.errors }}
+                        {{ g.form.set5res1.errors }}
+                        {{ g.form.set1res1 }}
+                        {{ g.form.set2res1 }}
+                        {{ g.form.set3res1 }}
+                        {{ g.form.set4res1 }}
+                        {{ g.form.set5res1 }}
+                    </div>
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <th scope="row" style="border: 0px"></th>
+            <td style="border: 0px"></td>
+            <td style="border: 0px">{{ g.get_p2 }}</td>
+            <td style="border: 0px">
+                {% if g.setresult_set.all %}
+                    <table style="width: 100%; align:justify;"><tr>
+                    {% for r in g.setresult_set.all %}
+                        <td style="width: 20%; border: 0px">
+                            {{ r.result2 }}
+                        </td>
+                    {% endfor %}
+                    </tr></table>
+                {% else %}
+                    <div class="form-group">
+                        {{ g.form.set1res2 }}
+                        {{ g.form.set2res2 }}
+                        {{ g.form.set3res2 }}
+                        {{ g.form.set4res2 }}
+                        {{ g.form.set5res2 }}
+                        {{ g.form.set1res2.errors }}
+                        {{ g.form.set2res2.errors }}
+                        {{ g.form.set3res2.errors }}
+                        {{ g.form.set4res2.errors }}
+                        {{ g.form.set5res2.errors }}
+                    </div>
+                    <input type="submit" value="Отправить результат" class="btn btn-secondary btn-sm">
+                {% endif %}
+                </td>
+        </tr>
+        </form>
+    {% endfor %}
+    </tbody>
+</table>
+</p>
+{% endblock %}

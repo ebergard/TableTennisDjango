@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Participants{% endblock %}
+
+{% block menu %}
+{% if tournament_status == 0 or tournament_status == 1 or tournament_status == 2 %}
+    {% if tournament.number_of_participants > 0  %}
+        <a class="nav-link" href="/participants">Участники</a>
+    {% endif %}
+{% endif %}
+{% if tournament_status == 1 or tournament_status == 2 %}
+    <a class="nav-link" href="/games">Игры</a>
+    <a class="nav-link" href="/rating">Рейтинг</a>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<h3 class="cover-heading">Участники:</h3>
+<p>
+<table class="table table-dark">
+    <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">Имя</th>
+            <th scope="col">Фамилия</th>
+            <th scope="col">Email</th>
+            <th scope="col">Номер на жеребьёвке</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for p in tournament.participant_set.all %}
+        <tr>
+            <th scope="row">{{ forloop.counter }}</th>
+            <td>{{ p.user.first_name }}</td>
+            <td>{{ p.user.last_name }}</td>
+            <td>{{ p.user.email }}</td>
+            <td>{{ p.drawn_number }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+</p>
+{% endblock %}

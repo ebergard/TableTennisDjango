@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Apply for tournament{% endblock %}
+
+{% block menu %}
+{% if tournament_status == 0 or tournament_status == 1 or tournament_status == 2 %}
+    {% if tournament.number_of_participants > 0 %}
+        <a class="nav-link" href="/participants">Участники</a>
+    {% endif %}
+{% endif %}
+{% if tournament_status == 1 or tournament_status == 2 %}
+    <a class="nav-link" href="/games">Игры</a>
+    <a class="nav-link" href="/rating">Рейтинг</a>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+{% if is_admin %}
+    <form action="{% url 'me_before_draw' %}" method="post">
+        {% csrf_token %}
+        <input type="submit" value="Сгенерировать расписание игр" class="btn btn-secondary">
+    </form>
+{% else %}
+    <p class="lead">
+    После жеребьёвки здесь будут отображены ваши предстоящие игры
+    </p>
+{% endif %}
+{% endblock %}

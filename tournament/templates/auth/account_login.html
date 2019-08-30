@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Register account{% endblock %}
+
+{% block menu %}
+{% if tournament_status == 0 or tournament_status == 1 or tournament_status == 2 %}
+    {% if tournament.number_of_participants > 0  %}
+        <a class="nav-link" href="/participants">Участники</a>
+    {% endif %}
+{% endif %}
+{% if tournament_status == 1 or tournament_status == 2 %}
+    <a class="nav-link" href="/games">Игры</a>
+    <a class="nav-link" href="/rating">Рейтинг</a>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<form action="{% url 'account_login' %}" method="post">
+{% csrf_token %}
+{{ form.non_field_errors }}
+{{ form.username.errors }}
+{{ form.password.errors }}
+<div class="form-group row justify-content-md-center">
+    <label for="{{ form.username.id_for_label }}" class="col-sm-2 col-form-label">Логин</label>
+    <div class="col-sm-6">
+    {{ form.username }}
+    </div>
+</div>
+<div class="form-group row justify-content-md-center">
+    <label for="{{ form.password.id_for_label }}" class="col-sm-2 col-form-label">Пароль</label>
+    <div class="col-sm-6">
+    {{ form.password }}
+    </div>
+</div>
+<input type="submit" value="Войти" class="btn btn-secondary">
+</form>
+<a href="/accounts/register">Зарегистрироваться</a>
+{% endblock %}

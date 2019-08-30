@@ -258,6 +258,10 @@ def me_before_draw(request):
     if tournament_status == 1:
         if request.user.username == "admin":
             is_admin = True
+            if tournament.game_set.all():
+                games_generated = True
+            else:
+                games_generated = False
         else:
             is_admin = False
 

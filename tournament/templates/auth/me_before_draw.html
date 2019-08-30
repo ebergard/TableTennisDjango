@@ -16,10 +16,16 @@
 
 {% block content %}
 {% if is_admin %}
+{% if games_generated %}
+    <p class="lead">
+    Игры сгенерированы
+    </p>
+{% else %}
     <form action="{% url 'me_before_draw' %}" method="post">
         {% csrf_token %}
         <input type="submit" value="Сгенерировать расписание игр" class="btn btn-secondary">
     </form>
+{% endif %}
 {% else %}
     <p class="lead">
     После жеребьёвки здесь будут отображены ваши предстоящие игры

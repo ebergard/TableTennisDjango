@@ -14,11 +14,11 @@ def get_current_tournament():
     return None
 
 
-def get_number_of_rounds(num_of_participants):
-    if num_of_participants % 2 == 0:
-        return 4
+def get_number_of_rounds(tour):
+    if tour.number_of_participants() % 2 == 0:
+        return tour.games_per_person
     else:
-        return 2
+        return tour.games_per_person // 2
 
 
 def generate_games_subset(games, participants):
@@ -61,7 +61,7 @@ def games_number_is_equal(games, participants):
 
 def generate_games():
     tour = get_current_tournament()
-    number_of_rounds = get_number_of_rounds(tour.number_of_participants())
+    number_of_rounds = get_number_of_rounds(tour)
     divider = 2
     games_number = tour.games_per_person
     participants = [i for i in range(1, tour.number_of_participants() + 1)]

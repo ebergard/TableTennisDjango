@@ -2,18 +2,6 @@
 
 {% block title %}Participants{% endblock %}
 
-{% block menu %}
-{% if tournament_status == 0 or tournament_status == 1 or tournament_status == 2 %}
-    {% if tournament.number_of_participants > 0  %}
-        <a class="nav-link" href="/participants">Участники</a>
-    {% endif %}
-{% endif %}
-{% if tournament_status == 1 or tournament_status == 2 %}
-    <a class="nav-link" href="/games">Игры</a>
-    <a class="nav-link" href="/rating">Рейтинг</a>
-{% endif %}
-{% endblock %}
-
 {% block content %}
 <h3 class="cover-heading">Участники:</h3>
 <p>
@@ -34,7 +22,11 @@
             <td>{{ p.user.first_name }}</td>
             <td>{{ p.user.last_name }}</td>
             <td>{{ p.user.email }}</td>
-            <td>{{ p.drawn_number }}</td>
+            {% if p.drawn_number %}
+                <td>{{ p.drawn_number }}</td>
+            {% else %}
+                <td></td>
+            {% endif %}
         </tr>
     {% endfor %}
     </tbody>

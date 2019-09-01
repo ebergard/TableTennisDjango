@@ -244,7 +244,7 @@ def me_register(request):
             return HttpResponseRedirect('/accounts/me/register/')
 
         return render(request, 'auth/me_register.html', locals())
-    raise Http404("Registration is not available")
+    return HttpResponseRedirect('/accounts/me/')
 
 
 @login_required
@@ -257,13 +257,12 @@ def me_before_draw(request):
 
     if tournament_status == 1:
         if request.user.username == "admin":
-            is_admin = True
             if tournament.game_set.all():
                 games_generated = True
             else:
                 games_generated = False
         else:
-            is_admin = False
+            return HttpResponseRedirect('/accounts/me/games/')
 
         if request.method == 'POST':
             schedule_ready = False
@@ -273,7 +272,7 @@ def me_before_draw(request):
             return HttpResponseRedirect('/accounts/me/before_draw/')
 
         return render(request, 'auth/me_before_draw.html', locals())
-    raise Http404("Page not found")
+    return HttpResponseRedirect('/accounts/me/')
 
 
 @login_required
@@ -284,10 +283,13 @@ def me_games(request, game=None):
     else:
         tournament_status = 5
 
-    if tournament_status == 2:
+    if tournament_status == 1 or tournament_status == 2:
         try:
             p = Participant.objects.get(Q(user=request.user) & Q(tournament=tournament))
         except ObjectDoesNotExist:
+            return render(request, 'auth/me_games.html', locals())
+
+        if not p.drawn_number:
             return render(request, 'auth/me_games.html', locals())
 
         games = tournament.game_set.filter(Q(participant1=p) | Q(participant2=p)).order_by('game_date', 'start_time')
@@ -310,4 +312,4 @@ def me_games(request, game=None):
                         return HttpResponseRedirect('/accounts/me/games/')
                     break
         return render(request, 'auth/me_games.html', locals())
-    raise Http404("Games are not available")
+    return HttpResponseRedirect('/accounts/me/')

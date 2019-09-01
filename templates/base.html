@@ -18,9 +18,18 @@
               <h3 class="masthead-brand">Ping-Pong AT</h3>
               <nav class="nav nav-masthead justify-content-center">
                 <a class="nav-link" href="/">Главная</a>
-                  {% block menu %}{% endblock %}
+                {% if tournament_status == 0 or tournament_status == 1 or tournament_status == 2 %}
+                    {% if tournament.number_of_participants > 0  %}
+                        <a class="nav-link" href="/participants">Участники</a>
+                    {% endif %}
+                {% endif %}
+                {% if tournament_status == 1 or tournament_status == 2 %}
+                    <a class="nav-link" href="/games">Игры</a>
+                {% endif %}
+                {% if tournament_status == 2 %}
+                    <a class="nav-link" href="/rating">Рейтинг</a>
+                {% endif %}
                 <a class="nav-link" href="/#">Правила</a>
-                <a class="nav-link" href="/#">Прошлые турниры</a>
                 {% if request.user.is_authenticated %}
                   {% if request.user.first_name %}
                     <a class="nav-link" href="/accounts/me/">{{ request.user.first_name }}</a>

@@ -66,10 +66,11 @@ class Participant(models.Model):
     tournament = models.ForeignKey(Tournament, to_field='id', on_delete=models.CASCADE)
     user = models.ForeignKey(User, to_field='username', on_delete=models.CASCADE)
     drawn_number = models.SmallIntegerField('drawn number', blank=True, null=True)
+    initialized = models.BooleanField(default=False)
     win_sets = models.IntegerField(default=0)
     win_balls = models.IntegerField(default=0)
     games_left = models.IntegerField(default=10)
-    initialized = models.BooleanField(default=False)
+    in_playoff = models.BooleanField(default=False)
 
     class Meta:
         unique_together = ('tournament', 'user')
@@ -148,6 +149,22 @@ class Game(models.Model):
 
     def get_p2(self):
         return self.participant2 or self.id2
+
+    def get_winner(self):
+        results = self.setresult_set.all()
+        if results:
+            p1_sets = 0
+            p2_sets = 0
+            for result in results:
+                if result.result1 > result.result2:
+                    p1_sets += 1
+                else:
+                    p2_sets += 1
+            if p1_sets > p2_sets:
+                return self.participant1
+            else:
+                return self.participant2
+        return None
 
 
 class SetResult(models.Model):

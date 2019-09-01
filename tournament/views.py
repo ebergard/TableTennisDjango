@@ -83,7 +83,42 @@ def rating(request):
 
 
 def playoff(request):
-    pass
+    tournament = get_current_tournament()
+    tournament_status = tournament.get_status()
+    playoffs = list(tournament.participant_set.filter(in_playoff=True))
+    if not playoffs:
+        for p in tournament.participant_set.all():
+            p.win_sets = 0
+            p.win_balls = 0
+            p.games_left = 0
+            for g in Game.objects.filter(Q(participant1=p) | Q(participant2=p)):
+                if g.setresult_set.exists():
+                    for r in g.setresult_set.all():
+                        if g.participant1 == p:
+                            if r.result1 > r.result2:
+                                p.win_sets += 1
+                            p.win_balls += r.result1 - r.result2
+                        else:
+                            if r.result2 > r.result1:
+                                p.win_sets += 1
+                            p.win_balls += r.result2 - r.result1
+                else:
+                    p.games_left += 1
+            p.save(update_fields=["win_sets", "win_balls", "games_left"])
+
+        participants = list(tournament.participant_set.all())
+        participants.sort(key=lambda elem: (elem.win_sets, elem.win_balls), reverse=True)
+        for i in range(8):
+            participants[i].in_playoff = True
+            participants[i].save(update_fields=["in_playoff"])
+        playoffs = participants[:8]
+
+    playoffs.sort(key=lambda elem: (elem.win_sets, elem.win_balls), reverse=True)
+
+    if tournament_status in (0, 1, 2, 3):
+        return render(request, 'tournament/playoff.html', locals())
+    else:
+        return HttpResponse("<h2>Play-off games are not available</h2>")
 
 
 def account_register(request):

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Play-off games{% endblock %}
+
+{% block content %}
+<h3 class="cover-heading">Игры плей-офф:</h3>
+<p>
+<table class="table table-dark">
+    <thead>
+        <tr>
+            <th scope="col">Место</th>
+            <th scope="col">Имя</th>
+            <th scope="col">Фамилия</th>
+            <th scope="col">Количество выигранных партий</th>
+            <th scope="col">Разница мячей</th>
+            <th scope="col">Осталось игр</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for p in playoffs %}
+        <tr>
+            <th scope="row">{{ forloop.counter }}</th>
+            <td>{{ p.user.first_name }}</td>
+            <td>{{ p.user.last_name }}</td>
+            <td>{{ p.win_sets }}</td>
+            <td>{{ p.win_balls }}</td>
+            <td>{{ p.games_left }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+</p>
+{% endblock %}

@@ -80,11 +80,11 @@ class Participant(models.Model):
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):
-            return self.user == other.user and self.tournament == other.tournament
+            return self.tournament == other.tournament and self.user == other.user
         return False
 
     def __ne__(self, other):
-        return self.user != other.user or self.tournament != other.tournament
+        return self.tournament != other.tournament or self.user != other.user
 
     def save(self, *args, **kwargs):
         if not self.initialized and self.drawn_number:
@@ -128,13 +128,15 @@ class Game(models.Model):
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):
-            return (self.id1 == other.id1 and self.id2 == other.id2) or \
-                   (self.id1 == other.id2 and self.id2 == other.id1)
+            return self.tournament == other.tournament and \
+                   ((self.id1 == other.id1 and self.id2 == other.id2) or
+                    (self.id1 == other.id2 and self.id2 == other.id1))
         return False
 
     def __ne__(self, other):
-        return (self.id1 != other.id1 or self.id2 != other.id2) and \
-               (self.id1 != other.id2 or self.id2 != other.id1)
+        return self.tournament != other.tournament or \
+               ((self.id1 != other.id1 or self.id2 != other.id2) and
+                (self.id1 != other.id2 or self.id2 != other.id1))
 
     def save(self, first_call=True, *args, **kwargs):
         if first_call:
@@ -149,6 +151,58 @@ class Game(models.Model):
 
     def get_p2(self):
         return self.participant2 or self.id2
+
+    def get_winner(self):
+        results = self.setresult_set.all()
+        if results:
+            p1_sets = 0
+            p2_sets = 0
+            for result in results:
+                if result.result1 > result.result2:
+                    p1_sets += 1
+                else:
+                    p2_sets += 1
+            if p1_sets > p2_sets:
+                return self.participant1
+            else:
+                return self.participant2
+        return None
+
+
+class GamePlayOff(models.Model):
+    tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE)
+    game_ids = (
+        (1, '1st quarter final'),
+        (2, '2nd quarter final'),
+        (3, '3d quarter final'),
+        (4, '4th quarter final'),
+        (5, '1st semifinal'),
+        (6, '2nd semifinal'),
+        (7, 'match for 3d place'),
+        (8, 'final'),
+    )
+    game_id = models.SmallIntegerField('Play-off game identifier', choices=game_ids)
+
+    participant1 = models.ForeignKey(Participant, to_field='id', on_delete=models.DO_NOTHING, related_name='playoffer1',
+                                     blank=True, null=True)
+    participant2 = models.ForeignKey(Participant, to_field='id', on_delete=models.DO_NOTHING, related_name='playoffer2',
+                                     blank=True, null=True)
+
+    game_date = models.DateField('game date', blank=True, null=True)
+    start_time = models.TimeField('game start time', blank=True, null=True)
+
+    def __str__(self):
+        p1 = self.participant1 or ""
+        p2 = self.participant2 or ""
+        return "{} vs. {}".format(p1, p2)
+
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            return self.tournament == other.tournament and self.game_id == other.game_id
+        return False
+
+    def __ne__(self, other):
+        return self.tournament != other.tournament or self.game_id != other.game_id
 
     def get_winner(self):
         results = self.setresult_set.all()

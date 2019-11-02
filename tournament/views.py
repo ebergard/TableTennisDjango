@@ -59,7 +59,7 @@ def rating(request):
         p.win_sets = 0
         p.win_balls = 0
         p.games_left = 0
-        for g in Game.objects.filter(Q(participant1=p) | Q(participant2=p)):
+        for g in Game.objects.filter((Q(participant1=p) | Q(participant2=p)) & Q(game_id=0)):
             if g.setresult_set.exists():
                 for r in g.setresult_set.all():
                     if g.participant1 == p:
@@ -139,20 +139,43 @@ def playoff(request):
     semi_games = list(Game.objects.filter(Q(tournament=tournament) &
                                           (Q(game_id=5) | Q(game_id=6))))
 
-    for sg in semi_games:
-        if type(sg.get_p1()) is not Participant:
-            p1 = list(Game.objects.filter(Q(tournament=tournament) & Q(game_id=sg.get_p1())))[0].get_winner()
+    for g in semi_games:
+        if type(g.get_p1()) is not Participant:
+            p1 = list(Game.objects.filter(Q(tournament=tournament) & Q(game_id=g.get_p1())))[0].get_winner()
             if p1:
-                sg.participant1 = p1
-                sg.save(first_call=False, update_fields=["participant1"])
-        if type(sg.get_p2()) is not Participant:
-            p2 = list(Game.objects.filter(Q(tournament=tournament) & Q(game_id=sg.get_p2())))[0].get_winner()
+                g.participant1 = p1
+                g.save(first_call=False, update_fields=["participant1"])
+        if type(g.get_p2()) is not Participant:
+            p2 = list(Game.objects.filter(Q(tournament=tournament) & Q(game_id=g.get_p2())))[0].get_winner()
             if p2:
-                sg.participant2 = p2
-                sg.save(first_call=False, update_fields=["participant2"])
+                g.participant2 = p2
+                g.save(first_call=False, update_fields=["participant2"])
 
     third_game = list(Game.objects.filter(Q(tournament=tournament) & Q(game_id=7)))
+    for g in third_game:
+        if type(g.get_p1()) is not Participant:
+            p1 = list(Game.objects.filter(Q(tournament=tournament) & Q(game_id=5)))[0].get_loser()
+            if p1:
+                g.participant1 = p1
+                g.save(first_call=False, update_fields=["participant1"])
+        if type(g.get_p2()) is not Participant:
+            p2 = list(Game.objects.filter(Q(tournament=tournament) & Q(game_id=6)))[0].get_loser()
+            if p2:
+                g.participant2 = p2
+                g.save(first_call=False, update_fields=["participant2"])
+
     final_game = list(Game.objects.filter(Q(tournament=tournament) & Q(game_id=8)))
+    for g in final_game:
+        if type(g.get_p1()) is not Participant:
+            p1 = list(Game.objects.filter(Q(tournament=tournament) & Q(game_id=5)))[0].get_winner()
+            if p1:
+                g.participant1 = p1
+                g.save(first_call=False, update_fields=["participant1"])
+        if type(g.get_p2()) is not Participant:
+            p2 = list(Game.objects.filter(Q(tournament=tournament) & Q(game_id=6)))[0].get_winner()
+            if p2:
+                g.participant2 = p2
+                g.save(first_call=False, update_fields=["participant2"])
 
     if tournament_status in (0, 1, 2, 3):
         return render(request, 'tournament/playoff.html', locals())

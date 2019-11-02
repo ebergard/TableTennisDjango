@@ -181,6 +181,22 @@ class Game(models.Model):
                 return self.participant2
         return None
 
+    def get_loser(self):
+        results = self.setresult_set.all()
+        if results:
+            p1_sets = 0
+            p2_sets = 0
+            for result in results:
+                if result.result1 > result.result2:
+                    p1_sets += 1
+                else:
+                    p2_sets += 1
+            if p1_sets < p2_sets:
+                return self.participant1
+            else:
+                return self.participant2
+        return None
+
 
 class SetResult(models.Model):
     game = models.ForeignKey(Game, on_delete=models.CASCADE)

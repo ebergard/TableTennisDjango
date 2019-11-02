@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from datetime import *
 from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.shortcuts import render
 from .models import Tournament, Participant, SetResult, Game
@@ -85,8 +86,8 @@ def rating(request):
 def playoff(request):
     tournament = get_current_tournament()
     tournament_status = tournament.get_status()
-    playoffs = list(tournament.participant_set.filter(in_playoff=True))
-    if not playoffs:
+    playoff_games = list(Game.objects.filter(Q(tournament=tournament) & ~Q(game_id=0)))
+    if not playoff_games:
         for p in tournament.participant_set.all():
             p.win_sets = 0
             p.win_balls = 0
@@ -108,12 +109,50 @@ def playoff(request):
 
         participants = list(tournament.participant_set.all())
         participants.sort(key=lambda elem: (elem.win_sets, elem.win_balls), reverse=True)
-        for i in range(8):
-            participants[i].in_playoff = True
-            participants[i].save(update_fields=["in_playoff"])
         playoffs = participants[:8]
 
-    playoffs.sort(key=lambda elem: (elem.win_sets, elem.win_balls), reverse=True)
+        for i in range(4):
+            g = Game(tournament=tournament, game_id=i+1, id1=playoffs[i].drawn_number, id2=playoffs[7-i].drawn_number,
+                     participant1=playoffs[i], participant2=playoffs[7-i],
+                     game_date=tournament.start_date_playoff, start_time="1{}:00:00".format(i+2))
+            g.save()
+
+        semi_day = tournament.start_date_playoff + timedelta(days=1)
+        for i in range(2):
+            g = Game(tournament=tournament, game_id=i+5, id1=i+1, id2=4-i,
+                     game_date=semi_day, start_time="1{}:00:00".format(i*2+3))
+            g.save()
+
+        final_day = tournament.start_date_playoff + timedelta(days=2)
+
+        g = Game(tournament=tournament, game_id=7, id1=-5, id2=-6,
+                 game_date=final_day, start_time="13:00:00")
+        g.save()
+        g = Game(tournament=tournament, game_id=8, id1=5, id2=6,
+                 game_date=final_day, start_time="15:00:00")
+        g.save()
+
+    quarter_games = list(Game.objects.filter(Q(tournament=tournament) &
+                                             (Q(game_id=1) | Q(game_id=2) |
+                                              Q(game_id=3) | Q(game_id=4))))
+
+    semi_games = list(Game.objects.filter(Q(tournament=tournament) &
+                                          (Q(game_id=5) | Q(game_id=6))))
+
+    for sg in semi_games:
+        if type(sg.get_p1()) is not Participant:
+            p1 = list(Game.objects.filter(Q(tournament=tournament) & Q(game_id=sg.get_p1())))[0].get_winner()
+            if p1:
+                sg.participant1 = p1
+                sg.save(first_call=False, update_fields=["participant1"])
+        if type(sg.get_p2()) is not Participant:
+            p2 = list(Game.objects.filter(Q(tournament=tournament) & Q(game_id=sg.get_p2())))[0].get_winner()
+            if p2:
+                sg.participant2 = p2
+                sg.save(first_call=False, update_fields=["participant2"])
+
+    third_game = list(Game.objects.filter(Q(tournament=tournament) & Q(game_id=7)))
+    final_game = list(Game.objects.filter(Q(tournament=tournament) & Q(game_id=8)))
 
     if tournament_status in (0, 1, 2, 3):
         return render(request, 'tournament/playoff.html', locals())

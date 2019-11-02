@@ -1,33 +1,212 @@
 {% extends "base.html" %}
 
-{% block title %}Play-off games{% endblock %}
+{% block title %}Games{% endblock %}
 
 {% block content %}
-<h3 class="cover-heading">Игры плей-офф:</h3>
+{% if quarter_games %}
+<h3 class="cover-heading">Четверть-финалы</h3>
 <p>
 <table class="table table-dark">
-    <thead>
-        <tr>
-            <th scope="col">Место</th>
-            <th scope="col">Имя</th>
-            <th scope="col">Фамилия</th>
-            <th scope="col">Количество выигранных партий</th>
-            <th scope="col">Разница мячей</th>
-            <th scope="col">Осталось игр</th>
-        </tr>
-    </thead>
     <tbody>
-    {% for p in playoffs %}
+    {% for g in quarter_games %}
         <tr>
             <th scope="row">{{ forloop.counter }}</th>
-            <td>{{ p.user.first_name }}</td>
-            <td>{{ p.user.last_name }}</td>
-            <td>{{ p.win_sets }}</td>
-            <td>{{ p.win_balls }}</td>
-            <td>{{ p.games_left }}</td>
+            <th scope="row">{{ g.game_date }}</th>
+            <td>{{ g.start_time|time:'H:i' }}</td>
+            {% if g.get_p1 == g.get_winner %}
+            <td class="text-success">
+            {% else %}
+            <td>
+            {% endif %}
+            {{ g.get_p1 }}</td>
+            <td>
+                <table style="width: 100%; height: 40px; align:justify;"><tr>
+                {% for r in g.setresult_set.all %}
+                    <td style="width: 20%; border: 0px">
+                        {{ r.result1 }}
+                    </td>
+                {% endfor %}
+                </tr></table>
+            </td>
+        </tr>
+        <tr>
+            <th scope="row" style="border: 0px"></th>
+            <th scope="row" style="border: 0px"></th>
+            <td style="border: 0px"></td>
+            {% if g.get_p2 == g.get_winner %}
+            <td style="border: 0px" class="text-success">
+            {% else %}
+            <td style="border: 0px">
+            {% endif %}
+            {{ g.get_p2 }}</td>
+            <td style="border: 0px">
+                <table style="width: 100%; height: 40px; align:justify;"><tr>
+                {% for r in g.setresult_set.all %}
+                    <td style="width: 20%; border: 0px">
+                        {{ r.result2 }}
+                    </td>
+                {% endfor %}
+                </tr></table>
+            </td>
         </tr>
     {% endfor %}
     </tbody>
 </table>
 </p>
+{% if semi_games %}
+<h3 class="cover-heading">Полуфиналы</h3>
+<p>
+<table class="table table-dark">
+    <tbody>
+    {% for g in semi_games %}
+        <tr>
+            <th scope="row">{{ forloop.counter }}</th>
+            <th scope="row">{{ g.game_date }}</th>
+            <td>{{ g.start_time|time:'H:i' }}</td>
+            {% if g.get_p1 == g.get_winner %}
+            <td class="text-success">
+            {% else %}
+            <td>
+            {% endif %}
+            {{ g.get_p1 }}</td>
+            <td>
+                <table style="width: 100%; height: 40px; align:justify;"><tr>
+                {% for r in g.setresult_set.all %}
+                    <td style="width: 20%; border: 0px">
+                        {{ r.result1 }}
+                    </td>
+                {% endfor %}
+                </tr></table>
+            </td>
+        </tr>
+        <tr>
+            <th scope="row" style="border: 0px"></th>
+            <th scope="row" style="border: 0px"></th>
+            <td style="border: 0px"></td>
+            {% if g.get_p2 == g.get_winner %}
+            <td style="border: 0px" class="text-success">
+            {% else %}
+            <td style="border: 0px">
+            {% endif %}
+            {{ g.get_p2 }}</td>
+            <td style="border: 0px">
+                <table style="width: 100%; height: 40px; align:justify;"><tr>
+                {% for r in g.setresult_set.all %}
+                    <td style="width: 20%; border: 0px">
+                        {{ r.result2 }}
+                    </td>
+                {% endfor %}
+                </tr></table>
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+</p>
+{% if third_game %}
+<h3 class="cover-heading">Матч за 3 место</h3>
+<p>
+<table class="table table-dark">
+    <tbody>
+    {% for g in third_game %}
+        <tr>
+            <th scope="row"></th>
+            <th scope="row">{{ g.game_date }}</th>
+            <td>{{ g.start_time|time:'H:i' }}</td>
+            {% if g.get_p1 == g.get_winner %}
+            <td class="text-success">
+            {% else %}
+            <td>
+            {% endif %}
+            {{ g.get_p1 }}</td>
+            <td>
+                <table style="width: 100%; height: 40px; align:justify;"><tr>
+                {% for r in g.setresult_set.all %}
+                    <td style="width: 20%; border: 0px">
+                        {{ r.result1 }}
+                    </td>
+                {% endfor %}
+                </tr></table>
+            </td>
+        </tr>
+        <tr>
+            <th scope="row" style="border: 0px"></th>
+            <th scope="row" style="border: 0px"></th>
+            <td style="border: 0px"></td>
+            {% if g.get_p2 == g.get_winner %}
+            <td style="border: 0px" class="text-success">
+            {% else %}
+            <td style="border: 0px">
+            {% endif %}
+            {{ g.get_p2 }}</td>
+            <td style="border: 0px">
+                <table style="width: 100%; height: 40px; align:justify;"><tr>
+                {% for r in g.setresult_set.all %}
+                    <td style="width: 20%; border: 0px">
+                        {{ r.result2 }}
+                    </td>
+                {% endfor %}
+                </tr></table>
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+</p>
+{% endif %}
+{% if final_game %}
+<h3 class="cover-heading">Финал</h3>
+<p>
+<table class="table table-dark">
+    <tbody>
+    {% for g in final_game %}
+        <tr>
+            <th scope="row"></th>
+            <th scope="row">{{ g.game_date }}</th>
+            <td>{{ g.start_time|time:'H:i' }}</td>
+            {% if g.get_p1 == g.get_winner %}
+            <td class="text-success">
+            {% else %}
+            <td>
+            {% endif %}
+            {{ g.get_p1 }}</td>
+            <td>
+                <table style="width: 100%; height: 40px; align:justify;"><tr>
+                {% for r in g.setresult_set.all %}
+                    <td style="width: 20%; border: 0px">
+                        {{ r.result1 }}
+                    </td>
+                {% endfor %}
+                </tr></table>
+            </td>
+        </tr>
+        <tr>
+            <th scope="row" style="border: 0px"></th>
+            <th scope="row" style="border: 0px"></th>
+            <td style="border: 0px"></td>
+            {% if g.get_p2 == g.get_winner %}
+            <td style="border: 0px" class="text-success">
+            {% else %}
+            <td style="border: 0px">
+            {% endif %}
+            {{ g.get_p2 }}</td>
+            <td style="border: 0px">
+                <table style="width: 100%; height: 40px; align:justify;"><tr>
+                {% for r in g.setresult_set.all %}
+                    <td style="width: 20%; border: 0px">
+                        {{ r.result2 }}
+                    </td>
+                {% endfor %}
+                </tr></table>
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+</p>
+{% endif %}
+{% endif %}
+{% else %}
+<h3 class="cover-heading">Вскоре здесь появится расписание игр</h3>
+{% endif %}
 {% endblock %}

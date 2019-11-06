@@ -5,10 +5,11 @@
 {% block content %}
 {% if games %}
 <h3 class="cover-heading">Расписание игр:</h3>
+{% for day in days %}
 <p>
 <table class="table table-dark">
     <tbody>
-    {% for g in games %}
+    {% for g in day %}
         <tr>
             <th scope="row">{{ g.game_date }}</th>
             <td>{{ g.start_time|time:'H:i' }}</td>
@@ -51,6 +52,7 @@
     </tbody>
 </table>
 </p>
+{% endfor %}
 {% else %}
 <h3 class="cover-heading">Вскоре здесь появится расписание игр</h3>
 {% endif %}

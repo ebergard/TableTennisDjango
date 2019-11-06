@@ -1,4 +1,6 @@
 import sys
+from openpyxl import *
+from openpyxl.styles import *
 import datetime
 import random
 from datetime import *
@@ -215,3 +217,19 @@ def generate_schedule(games):
         return True
     else:
         return False
+
+
+def split_games_by_days(games):
+    games = list(games)
+    games.sort(key=lambda game: (game.game_date, game.start_time))
+    day = games[0].game_date
+    days = []
+    days_tmp = []
+    for game in games:
+        if game.game_date == day:
+            days_tmp.append(game)
+            continue
+        day = game.game_date
+        days.append(days_tmp)
+        days_tmp = [game]
+    return days

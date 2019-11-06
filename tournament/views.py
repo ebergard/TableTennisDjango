@@ -12,7 +12,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
-from tournament.functions import generate_games, generate_schedule, get_current_tournament
+from tournament.functions import generate_games, generate_schedule, get_current_tournament, split_games_by_days
 
 
 def index(request):
@@ -45,7 +45,8 @@ def participants(request):
 def games(request, game=None):
     tournament = get_current_tournament()
     tournament_status = tournament.get_status()
-    games = tournament.game_set.all().order_by('game_date', 'start_time')
+    games = tournament.game_set.filter(game_id=0).order_by('game_date', 'start_time')
+    days = split_games_by_days(games)
     if tournament_status in (0, 1, 2, 3):
         return render(request, 'tournament/games.html', locals())
     else:

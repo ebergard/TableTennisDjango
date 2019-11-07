@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block title %}Generate .xls{% endblock %}
+
+{% block content %}
+<form action="{% url 'me_after_draw' %}" method="post">
+    {% csrf_token %}
+    <input type="submit" value="Сгенерировать .xls с расписанием игр" class="btn btn-secondary">
+</form>
+{% endblock %}

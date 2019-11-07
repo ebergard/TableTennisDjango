@@ -3,14 +3,8 @@
 {% block title %}Generate games{% endblock %}
 
 {% block content %}
-{% if games_generated %}
-    <p class="lead">
-    Игры сгенерированы
-    </p>
-{% else %}
-    <form action="{% url 'me_before_draw' %}" method="post">
-        {% csrf_token %}
-        <input type="submit" value="Сгенерировать расписание игр" class="btn btn-secondary">
-    </form>
-{% endif %}
+<form action="{% url 'me_before_draw' %}" method="post">
+    {% csrf_token %}
+    <input type="submit" value="Сгенерировать расписание игр" class="btn btn-secondary">
+</form>
 {% endblock %}

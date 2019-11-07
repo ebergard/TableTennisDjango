@@ -29,7 +29,7 @@
                 {% if tournament_status == 2 or tournament_status == 3 %}
                     <a class="nav-link" href="/rating">Рейтинг</a>
                 {% endif %}
-                {% if tournament_status == 3 %}
+                {% if tournament_status == 2 or tournament_status == 3 %}
                     <a class="nav-link" href="/playoff">Плей-офф</a>
                 {% endif %}
                 {% if request.user.is_authenticated %}

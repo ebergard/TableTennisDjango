@@ -1,4 +1,5 @@
 import sys
+import os
 from openpyxl import *
 from openpyxl.styles import *
 import datetime
@@ -8,6 +9,7 @@ from time import *
 from itertools import cycle
 from tournament.models import Tournament, Game
 from django.utils import timezone
+from ping.settings import BASE_DIR
 
 
 def get_current_tournament():
@@ -233,3 +235,66 @@ def split_games_by_days(games):
         days.append(days_tmp)
         days_tmp = [game]
     return days
+
+
+def write_schedule_to_xls(days, num_of_sets):
+
+    xls_dir = r"tournament\static\tournament"
+    filename = "schedule.xlsx"
+
+    book = Workbook()
+    sheet = book.active
+    sheet.title = "Расписание"
+
+    row = 1
+    for day in days:
+        fill_flag = True
+        for i in range(len(day)):
+
+            # set data
+            sheet.cell(row, 1, day[i].game_date)
+            sheet.cell(row, 2, day[i].start_time)
+            sheet.cell(row, 3, str(day[i].get_p1()))
+            sheet.cell(row + 1, 3, str(day[i].get_p2()))
+
+            # set borders
+            thin = Side(border_style="thin", color="000000")
+            hair = Side(border_style="hair", color="000000")
+
+            top = Border(top=thin)
+            left = Border(left=thin)
+            right = Border(right=thin)
+            bottom = Border(bottom=thin)
+            left2 = Border(left=hair)
+
+            end_col = chr(ord('C') + num_of_sets)
+            rows = sheet['A' + str(row):end_col + str(row + 1)]
+
+            for cell in rows[0]:
+                cell.border = cell.border + top
+
+            for j in range(0, 4):
+                rows[0][j].border = rows[0][j].border + left
+                rows[1][j].border = rows[1][j].border + left
+            for j in range(4, len(rows[0])):
+                rows[0][j].border = rows[0][j].border + left2
+                rows[1][j].border = rows[1][j].border + left2
+            rows[0][-1].border = rows[0][-1].border + right
+            rows[1][-1].border = rows[1][-1].border + right
+
+            for cell in rows[-1]:
+                cell.border = cell.border + bottom
+
+            # set background
+            if fill_flag:
+                fill = PatternFill("solid", fgColor="DEDEDE")
+                for _row in rows:
+                    for cell in _row:
+                        cell.fill = fill
+                fill_flag = False
+            else:
+                fill_flag = True
+
+            row += 2
+        row += 1
+    book.save(os.path.join(BASE_DIR, xls_dir, filename))

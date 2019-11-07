@@ -12,7 +12,8 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
-from tournament.functions import generate_games, generate_schedule, get_current_tournament, split_games_by_days
+from tournament.functions import generate_games, generate_schedule, get_current_tournament, split_games_by_days,\
+write_schedule_to_xls
 
 
 def index(request):
@@ -46,7 +47,8 @@ def games(request, game=None):
     tournament = get_current_tournament()
     tournament_status = tournament.get_status()
     games = tournament.game_set.filter(game_id=0).order_by('game_date', 'start_time')
-    days = split_games_by_days(games)
+    if games:
+        days = split_games_by_days(games)
     if tournament_status in (0, 1, 2, 3):
         return render(request, 'tournament/games.html', locals())
     else:
@@ -295,9 +297,7 @@ def me_before_draw(request):
     if tournament_status == 1:
         if request.user.username == "admin":
             if tournament.game_set.all():
-                games_generated = True
-            else:
-                games_generated = False
+                return HttpResponseRedirect('/accounts/me/after_draw/')
         else:
             return HttpResponseRedirect('/accounts/me/games/')
 
@@ -309,6 +309,28 @@ def me_before_draw(request):
             return HttpResponseRedirect('/accounts/me/before_draw/')
 
         return render(request, 'auth/me_before_draw.html', locals())
+    return HttpResponseRedirect('/accounts/me/')
+
+
+@login_required
+def me_after_draw(request):
+    tournament = get_current_tournament()
+    if tournament:
+        tournament_status = tournament.get_status()
+    else:
+        tournament_status = 5
+
+    if tournament_status == 1:
+        if request.user.username != "admin":
+            return HttpResponseRedirect('/accounts/me/games/')
+
+        if request.method == 'POST':
+            games = tournament.game_set.filter(game_id=0).order_by('game_date', 'start_time')
+            days = split_games_by_days(games)
+            write_schedule_to_xls(days, tournament.number_of_sets)
+            return HttpResponseRedirect('/accounts/me/after_draw/')
+
+        return render(request, 'auth/me_after_draw.html', locals())
     return HttpResponseRedirect('/accounts/me/')
 
 

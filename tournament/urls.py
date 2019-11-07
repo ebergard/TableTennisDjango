@@ -14,6 +14,7 @@ urlpatterns = [
     path('accounts/me/', views.me, name='me'),
     path('accounts/me/register/', views.me_register, name='me_register'),
     path('accounts/me/before_draw/', views.me_before_draw, name='me_before_draw'),
+    path('accounts/me/after_draw/', views.me_after_draw, name='me_after_draw'),
     path('accounts/me/games/', views.me_games, name='me_games'),
     path('accounts/me/games/<game>/', views.me_games, name='me_game'),
 ]

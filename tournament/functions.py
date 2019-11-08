@@ -9,6 +9,7 @@ from time import *
 from itertools import cycle
 from tournament.models import Tournament, Game
 from django.utils import timezone
+from django.db.models import Q
 from ping.settings import BASE_DIR
 
 
@@ -111,6 +112,30 @@ def generate_games():
             attempt = 0
 
     return games
+
+
+def generate_playoff_games():
+    tournament = get_current_tournament()
+
+    for i in range(4):
+        g = Game(tournament=tournament, game_id=i+1, id1=i+1, id2=8-i,
+                 game_date=tournament.start_date_playoff, start_time="1{}:00:00".format(i+2))
+        g.save()
+
+    semi_day = tournament.start_date_playoff + timedelta(days=1)
+    for i in range(2):
+        g = Game(tournament=tournament, game_id=i+5, id1=i+1, id2=4-i,
+                 game_date=semi_day, start_time="1{}:00:00".format(i*2+3))
+        g.save()
+
+    final_day = tournament.start_date_playoff + timedelta(days=2)
+
+    g = Game(tournament=tournament, game_id=7, id1=-5, id2=-6,
+             game_date=final_day, start_time="13:00:00")
+    g.save()
+    g = Game(tournament=tournament, game_id=8, id1=5, id2=6,
+             game_date=final_day, start_time="15:00:00")
+    g.save()
 
 
 def get_time(start_time):
@@ -234,7 +259,30 @@ def split_games_by_days(games):
         day = game.game_date
         days.append(days_tmp)
         days_tmp = [game]
+    days.append(days_tmp)
     return days
+
+
+def recount_rating():
+    tournament = get_current_tournament()
+    for p in tournament.participant_set.all():
+        p.win_sets = 0
+        p.win_balls = 0
+        p.games_left = 0
+        for g in Game.objects.filter((Q(participant1=p) | Q(participant2=p)) & Q(game_id=0)):
+            if g.setresult_set.exists():
+                for r in g.setresult_set.all():
+                    if g.participant1 == p:
+                        if r.result1 > r.result2:
+                            p.win_sets += 1
+                        p.win_balls += r.result1 - r.result2
+                    else:
+                        if r.result2 > r.result1:
+                            p.win_sets += 1
+                        p.win_balls += r.result2 - r.result1
+            else:
+                p.games_left += 1
+        p.save(update_fields=["win_sets", "win_balls", "games_left"])
 
 
 def write_schedule_to_xls(days, num_of_sets):

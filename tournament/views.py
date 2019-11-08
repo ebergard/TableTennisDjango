@@ -13,7 +13,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from tournament.functions import generate_games, generate_schedule, get_current_tournament, split_games_by_days,\
-write_schedule_to_xls
+    write_schedule_to_xls, generate_playoff_games, recount_rating
 
 
 def index(request):
@@ -46,7 +46,7 @@ def participants(request):
 def games(request, game=None):
     tournament = get_current_tournament()
     tournament_status = tournament.get_status()
-    games = tournament.game_set.filter(game_id=0).order_by('game_date', 'start_time')
+    games = list(tournament.game_set.filter(game_id=0).order_by('game_date', 'start_time'))
     if games:
         days = split_games_by_days(games)
     if tournament_status in (0, 1, 2, 3):
@@ -58,24 +58,7 @@ def games(request, game=None):
 def rating(request):
     tournament = get_current_tournament()
     tournament_status = tournament.get_status()
-    for p in tournament.participant_set.all():
-        p.win_sets = 0
-        p.win_balls = 0
-        p.games_left = 0
-        for g in Game.objects.filter((Q(participant1=p) | Q(participant2=p)) & Q(game_id=0)):
-            if g.setresult_set.exists():
-                for r in g.setresult_set.all():
-                    if g.participant1 == p:
-                        if r.result1 > r.result2:
-                            p.win_sets += 1
-                        p.win_balls += r.result1 - r.result2
-                    else:
-                        if r.result2 > r.result1:
-                            p.win_sets += 1
-                        p.win_balls += r.result2 - r.result1
-            else:
-                p.games_left += 1
-        p.save(update_fields=["win_sets", "win_balls", "games_left"])
+    recount_rating()
 
     participants = list(tournament.participant_set.all())
     participants.sort(key=lambda elem: (elem.win_sets, elem.win_balls), reverse=True)
@@ -89,55 +72,20 @@ def rating(request):
 def playoff(request):
     tournament = get_current_tournament()
     tournament_status = tournament.get_status()
-    playoff_games = list(Game.objects.filter(Q(tournament=tournament) & ~Q(game_id=0)))
-    if not playoff_games:
-        for p in tournament.participant_set.all():
-            p.win_sets = 0
-            p.win_balls = 0
-            p.games_left = 0
-            for g in Game.objects.filter(Q(participant1=p) | Q(participant2=p)):
-                if g.setresult_set.exists():
-                    for r in g.setresult_set.all():
-                        if g.participant1 == p:
-                            if r.result1 > r.result2:
-                                p.win_sets += 1
-                            p.win_balls += r.result1 - r.result2
-                        else:
-                            if r.result2 > r.result1:
-                                p.win_sets += 1
-                            p.win_balls += r.result2 - r.result1
-                else:
-                    p.games_left += 1
-            p.save(update_fields=["win_sets", "win_balls", "games_left"])
+    recount_rating()
 
-        participants = list(tournament.participant_set.all())
-        participants.sort(key=lambda elem: (elem.win_sets, elem.win_balls), reverse=True)
-        playoffs = participants[:8]
-
-        for i in range(4):
-            g = Game(tournament=tournament, game_id=i+1, id1=playoffs[i].drawn_number, id2=playoffs[7-i].drawn_number,
-                     participant1=playoffs[i], participant2=playoffs[7-i],
-                     game_date=tournament.start_date_playoff, start_time="1{}:00:00".format(i+2))
-            g.save()
-
-        semi_day = tournament.start_date_playoff + timedelta(days=1)
-        for i in range(2):
-            g = Game(tournament=tournament, game_id=i+5, id1=i+1, id2=4-i,
-                     game_date=semi_day, start_time="1{}:00:00".format(i*2+3))
-            g.save()
-
-        final_day = tournament.start_date_playoff + timedelta(days=2)
-
-        g = Game(tournament=tournament, game_id=7, id1=-5, id2=-6,
-                 game_date=final_day, start_time="13:00:00")
-        g.save()
-        g = Game(tournament=tournament, game_id=8, id1=5, id2=6,
-                 game_date=final_day, start_time="15:00:00")
-        g.save()
+    participants = list(tournament.participant_set.all())
+    participants.sort(key=lambda elem: (elem.win_sets, elem.win_balls), reverse=True)
+    playoffs = participants[:8]
 
     quarter_games = list(Game.objects.filter(Q(tournament=tournament) &
                                              (Q(game_id=1) | Q(game_id=2) |
                                               Q(game_id=3) | Q(game_id=4))))
+
+    for g in quarter_games:
+        g.participant1 = playoffs[g.id1 - 1]
+        g.participant2 = playoffs[g.id2 - 1]
+        g.save(first_call=False, update_fields=["participant1", "participant2"])
 
     semi_games = list(Game.objects.filter(Q(tournament=tournament) &
                                           (Q(game_id=5) | Q(game_id=6))))
@@ -306,6 +254,7 @@ def me_before_draw(request):
             while not schedule_ready:
                 games = generate_games()
                 schedule_ready = generate_schedule(games)
+            generate_playoff_games()
             return HttpResponseRedirect('/accounts/me/before_draw/')
 
         return render(request, 'auth/me_before_draw.html', locals())
@@ -351,7 +300,8 @@ def me_games(request, game=None):
         if not p.drawn_number:
             return render(request, 'auth/me_games.html', locals())
 
-        games = tournament.game_set.filter(Q(participant1=p) | Q(participant2=p)).order_by('game_date', 'start_time')
+        games = tournament.game_set.filter(Q(game_id=0) &
+                                           (Q(participant1=p) | Q(participant2=p))).order_by('game_date', 'start_time')
 
         for g in games:
             g.form = ResultForm()

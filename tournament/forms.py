@@ -48,6 +48,60 @@ class ResultForm(forms.Form):
             r1 = cleaned_data.get(f1)
             r2 = cleaned_data.get(f2)
 
+            if r1 is None or r2 is None:
+                break
+
+            if r1 > r2:
+                if r1 - r2 > 2:
+                    if r1 != 11:
+                        self.add_error(f1, "Set #{}: Result must be 11".format(i))
+                elif r1 - r2 == 1:
+                    self.add_error(f1, "Set #{}: Point difference must be at least 2".format(i))
+                else:
+                    if r1 < 11:
+                        self.add_error(f1, "Set #{}: Result must be at least 11".format(i))
+            elif r2 > r1:
+                if r2 - r1 > 2:
+                    if r2 != 11:
+                        self.add_error(f1, "Set #{}: Result must be 11".format(i))
+                elif r2 - r1 == 1:
+                    self.add_error(f1, "Set #{}: Point difference must be at least 2".format(i))
+                else:
+                    if r2 < 11:
+                        self.add_error(f1, "Set #{}: Result must be at least 11".format(i))
+            else:
+                self.add_error(f1, ValidationError(_("Set #{}: Results cannot be equal".format(i))))
+
+        return cleaned_data
+
+
+class PlayoffResultForm(ResultForm):
+    set5res1 = forms.IntegerField(label='Результат участника #1 в 5-м сете', max_value=99, min_value=0, required=False)
+    set5res2 = forms.IntegerField(label='Результат участника #2 в 5-м сете', max_value=99, min_value=0, required=False)
+    set6res1 = forms.IntegerField(label='Результат участника #1 в 6-м сете', max_value=99, min_value=0, required=False)
+    set6res2 = forms.IntegerField(label='Результат участника #2 в 6-м сете', max_value=99, min_value=0, required=False)
+    set7res1 = forms.IntegerField(label='Результат участника #1 в 7-м сете', max_value=99, min_value=0, required=False)
+    set7res2 = forms.IntegerField(label='Результат участника #2 в 7-м сете', max_value=99, min_value=0, required=False)
+
+    set5res1.widget.attrs.update({'style': 'max-width: 40px'})
+    set5res2.widget.attrs.update({'style': 'max-width: 40px'})
+    set6res1.widget.attrs.update({'style': 'max-width: 40px'})
+    set6res2.widget.attrs.update({'style': 'max-width: 40px'})
+    set7res1.widget.attrs.update({'style': 'max-width: 40px'})
+    set7res2.widget.attrs.update({'style': 'max-width: 40px'})
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        for i in range(1, 8):
+            f1 = "set{}res1".format(i)
+            f2 = "set{}res2".format(i)
+            r1 = cleaned_data.get(f1)
+            r2 = cleaned_data.get(f2)
+
+            if r1 is None or r2 is None:
+                break
+
             if r1 > r2:
                 if r1 - r2 > 2:
                     if r1 != 11:

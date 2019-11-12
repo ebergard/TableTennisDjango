@@ -3,7 +3,7 @@ from datetime import *
 from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.shortcuts import render
 from .models import Tournament, Participant, SetResult, Game
-from .forms import RegisterForm, ResultForm, UserCreationForm
+from .forms import PlayoffResultForm, ResultForm, UserCreationForm
 from django.db import IntegrityError
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
@@ -200,7 +200,7 @@ def me(request, game=None):
         return HttpResponseRedirect('/accounts/me/games/')
     # Play-off
     elif tournament_status == 3:
-        pass
+        return HttpResponseRedirect('/accounts/me/playoff_games/')
     # Tournament finished
     elif tournament_status == 4:
         pass
@@ -321,4 +321,44 @@ def me_games(request, game=None):
                         return HttpResponseRedirect('/accounts/me/games/')
                     break
         return render(request, 'auth/me_games.html', locals())
+    return HttpResponseRedirect('/accounts/me/')
+
+
+@login_required
+def me_playoff_games(request, game=None):
+    tournament = get_current_tournament()
+    if tournament:
+        tournament_status = tournament.get_status()
+    else:
+        tournament_status = 5
+
+    if tournament_status == 3:
+        try:
+            p = Participant.objects.get(Q(user=request.user) & Q(tournament=tournament))
+        except ObjectDoesNotExist:
+            return render(request, 'auth/me_playoff_games.html', locals())
+
+        games = tournament.game_set.filter(~Q(game_id=0) &
+                                           (Q(participant1=p) | Q(participant2=p))).order_by('game_date', 'start_time')
+
+        for g in games:
+            g.form = PlayoffResultForm()
+
+        if request.method == 'POST':
+            game = Game.objects.get(pk=game)
+            for g in games:
+                if g == game:
+                    g.form = PlayoffResultForm(request.POST)
+                    if g.form.is_valid():
+                        for i in range(1, 8):
+                            if g.form.cleaned_data['set{}res1'.format(i)] is None:
+                                break
+                            s = SetResult(game=game,
+                                          set_number=i,
+                                          result1=g.form.cleaned_data['set{}res1'.format(i)],
+                                          result2=g.form.cleaned_data['set{}res2'.format(i)])
+                            s.save()
+                        return HttpResponseRedirect('/accounts/me/playoff_games/')
+                    break
+        return render(request, 'auth/me_playoff_games.html', locals())
     return HttpResponseRedirect('/accounts/me/')

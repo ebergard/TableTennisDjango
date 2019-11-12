@@ -17,4 +17,6 @@ urlpatterns = [
     path('accounts/me/after_draw/', views.me_after_draw, name='me_after_draw'),
     path('accounts/me/games/', views.me_games, name='me_games'),
     path('accounts/me/games/<game>/', views.me_games, name='me_game'),
+    path('accounts/me/playoff_games/', views.me_playoff_games, name='me_playoff_games'),
+    path('accounts/me/playoff_games/<game>/', views.me_playoff_games, name='me_playoff_game'),
 ]

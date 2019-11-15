@@ -160,10 +160,42 @@ class Game(models.Model):
         super(Game, self).save(*args, **kwargs)
 
     def get_p1(self):
-        return self.participant1 or self.id1
+        if self.participant1:
+            return self.participant1
+
+        if self.game_id == 0:
+            return "Номер на жеребьёвке #{}".format(self.id1)
+        elif self.game_id in (1, 2, 3, 4):
+            return "{} место на групповом этапе".format(self.game_id)
+        elif self.game_id == 5:
+            return "Победитель четверть-финала #1"
+        elif self.game_id == 6:
+            return "Победитель четверть-финала #2"
+        elif self.game_id == 7:
+            return "Проигравший полуфинала #1"
+        elif self.game_id == 8:
+            return "Победитель полуфинала #1"
+        else:
+            return None
 
     def get_p2(self):
-        return self.participant2 or self.id2
+        if self.participant2:
+            return self.participant2
+
+        if self.game_id == 0:
+            return "Номер на жеребьёвке #{}".format(self.id2)
+        elif self.game_id in (1, 2, 3, 4):
+            return "{} место на групповом этапе".format(8 - self.game_id + 1)
+        elif self.game_id == 5:
+            return "Победитель четверть-финала #4"
+        elif self.game_id == 6:
+            return "Победитель четверть-финала #3"
+        elif self.game_id == 7:
+            return "Проигравший полуфинала #2"
+        elif self.game_id == 8:
+            return "Победитель полуфинала #2"
+        else:
+            return None
 
     def get_winner(self):
         results = self.setresult_set.all()
@@ -203,6 +235,9 @@ class SetResult(models.Model):
     set_number = models.SmallIntegerField('set number')
     result1 = models.SmallIntegerField('participant1 result')
     result2 = models.SmallIntegerField('participant2 result')
+
+    class Meta:
+        unique_together = ('game', 'set_number')
 
     def __str__(self):
         return "{} {} set result: {} {}".format(self.game, self.set_number, self.result1, self.result2)

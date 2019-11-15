@@ -92,12 +92,12 @@ def playoff(request):
 
     for g in semi_games:
         if type(g.get_p1()) is not Participant:
-            p1 = list(Game.objects.filter(Q(tournament=tournament) & Q(game_id=g.get_p1())))[0].get_winner()
+            p1 = list(Game.objects.filter(Q(tournament=tournament) & Q(game_id=g.id1)))[0].get_winner()
             if p1:
                 g.participant1 = p1
                 g.save(first_call=False, update_fields=["participant1"])
         if type(g.get_p2()) is not Participant:
-            p2 = list(Game.objects.filter(Q(tournament=tournament) & Q(game_id=g.get_p2())))[0].get_winner()
+            p2 = list(Game.objects.filter(Q(tournament=tournament) & Q(game_id=g.id2)))[0].get_winner()
             if p2:
                 g.participant2 = p2
                 g.save(first_call=False, update_fields=["participant2"])

@@ -236,8 +236,8 @@ class SetResult(models.Model):
     result1 = models.SmallIntegerField('participant1 result')
     result2 = models.SmallIntegerField('participant2 result')
 
-    class Meta:
-        unique_together = ('game', 'set_number')
+    # class Meta:
+    #    unique_together = ('game', 'set_number')
 
     def __str__(self):
         return "{} {} set result: {} {}".format(self.game, self.set_number, self.result1, self.result2)

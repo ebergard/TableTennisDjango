@@ -14,7 +14,7 @@
 {% else %}
     <form action="{% url 'me_register' %}" method="post">
         {% csrf_token %}
-        <input type="submit" value="Зарегистрироваться" class="btn btn-secondary">
+        <input type="submit" value="Хочу участвовать!" class="btn btn-secondary">
     </form>
 {% endif %}
 {% endblock %}

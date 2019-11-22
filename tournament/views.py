@@ -350,6 +350,8 @@ def me_playoff_games(request, game=None):
             game = Game.objects.get(pk=game)
             for g in games:
                 if g == game:
+                    if g.setresult_set.exists():
+                        return HttpResponseRedirect('/accounts/me/playoff_games/')
                     g.form = PlayoffResultForm(request.POST)
                     if g.form.is_valid():
                         for i in range(1, 8):

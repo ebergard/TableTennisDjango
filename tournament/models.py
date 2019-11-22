@@ -88,7 +88,7 @@ class Participant(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.initialized and self.drawn_number:
-            games = self.tournament.game_set.all()
+            games = self.tournament.game_set.filter(game_id=0)
             for game in games:
                 if game.id1 == self.drawn_number:
                     game.participant1 = self

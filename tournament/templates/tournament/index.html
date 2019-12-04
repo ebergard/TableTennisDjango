@@ -22,7 +22,7 @@
     {% endif %}
     {% if tournament_status == 2 %}
         <p class="lead">
-            Количество участников: {{ tournament.number_of_participants }}
+            {{ tournament.description | safe }}
         </p>
     {% endif %}
 </h2>

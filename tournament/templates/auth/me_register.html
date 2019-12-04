@@ -7,6 +7,9 @@
     Предстоящий турнир: </br>
     {{ tournament }}
 </p>
+<p class="lead">
+    {{ tournament.description | safe }}
+</p>
 {% if is_registered %}
     <p class="lead">
     Вы зарегистрированы

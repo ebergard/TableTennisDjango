@@ -36,7 +36,10 @@ def index(request):
 
 def participants(request):
     tournament = get_current_tournament()
-    tournament_status = tournament.get_status()
+    if tournament:
+        tournament_status = tournament.get_status()
+    else:
+        return HttpResponse("<h2>Participants list is not available</h2>")
     if tournament_status in (0, 1, 2, 3):
         return render(request, 'tournament/participants.html', locals())
     else:
@@ -45,7 +48,10 @@ def participants(request):
 
 def games(request, game=None):
     tournament = get_current_tournament()
-    tournament_status = tournament.get_status()
+    if tournament:
+        tournament_status = tournament.get_status()
+    else:
+        return HttpResponse("<h2>Games list is not available</h2>")
     games = list(tournament.game_set.filter(game_id=0).order_by('game_date', 'start_time'))
     if games:
         days = split_games_by_days(games)
@@ -57,7 +63,10 @@ def games(request, game=None):
 
 def rating(request):
     tournament = get_current_tournament()
-    tournament_status = tournament.get_status()
+    if tournament:
+        tournament_status = tournament.get_status()
+    else:
+        return HttpResponse("<h2>Rating is not available</h2>")
     recount_rating()
 
     participants = list(tournament.participant_set.all())
@@ -71,7 +80,10 @@ def rating(request):
 
 def playoff(request):
     tournament = get_current_tournament()
-    tournament_status = tournament.get_status()
+    if tournament:
+        tournament_status = tournament.get_status()
+    else:
+        return HttpResponse("<h2>Play-off games are not available</h2>")
     recount_rating()
 
     participants = list(tournament.participant_set.all())
@@ -136,9 +148,6 @@ def playoff(request):
 
 def account_register(request):
 
-    tournament = get_current_tournament()
-    tournament_status = tournament.get_status()
-
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid():
@@ -156,9 +165,6 @@ def account_register(request):
 
 
 def account_login(request):
-
-    tournament = get_current_tournament()
-    tournament_status = tournament.get_status()
 
     if request.method == 'POST':
         form = AuthenticationForm(data=request.POST)

@@ -19,6 +19,9 @@
             Даты проведения: {{ tournament }} <br>
             Жеребьёвка: {{ tournament.draw_time | date:"H:i, d F Y" }} в теннисной
         </p>
+        <p class="lead">
+            {{ tournament.description | safe }}
+        </p>
     {% endif %}
     {% if tournament_status == 2 %}
         <p class="lead">

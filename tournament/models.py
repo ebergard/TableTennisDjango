@@ -75,6 +75,9 @@ class Participant(models.Model):
     class Meta:
         unique_together = ('tournament', 'user')
 
+    def __hash__(self):
+        return hash((self.tournament, self.user))
+
     def __str__(self):
         return "{} {}".format(self.user.first_name, self.user.last_name)
 
@@ -126,13 +129,16 @@ class Game(models.Model):
     id1 = models.SmallIntegerField('participant1 drawn number')
     id2 = models.SmallIntegerField('participant2 drawn number')
 
-    participant1 = models.ForeignKey(Participant, to_field='id', on_delete=models.DO_NOTHING, related_name='participant1',
+    participant1 = models.ForeignKey(Participant, to_field='id', on_delete=models.CASCADE, related_name='participant1',
                                      blank=True, null=True)
-    participant2 = models.ForeignKey(Participant, to_field='id', on_delete=models.DO_NOTHING, related_name='participant2',
+    participant2 = models.ForeignKey(Participant, to_field='id', on_delete=models.CASCADE, related_name='participant2',
                                      blank=True, null=True)
 
     game_date = models.DateField('game date', blank=True, null=True)
     start_time = models.TimeField('game start time', blank=True, null=True)
+
+    def __hash__(self):
+        return hash((self.tournament, self.participant1, self.participant2))
 
     def __str__(self):
         p1 = self.participant1 or self.id1

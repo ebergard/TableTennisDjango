@@ -6,7 +6,6 @@
 {% if games %}
 <h3 class="cover-heading">Расписание игр:</h3>
 {% for day in days %}
-<p>
 <table class="table table-dark">
     <tbody>
     {% for g in day %}
@@ -51,7 +50,6 @@
     {% endfor %}
     </tbody>
 </table>
-</p>
 {% endfor %}
 {% else %}
 <h3 class="cover-heading">Вскоре здесь появится расписание игр</h3>

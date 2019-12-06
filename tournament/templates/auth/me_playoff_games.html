@@ -6,7 +6,7 @@
 {% if p %}
     {% if games %}
         <h3 class="cover-heading">Мои игры:</h3>
-        <p>
+
         <table class="table table-dark">
             <tbody>
             {% for g in games %}
@@ -84,7 +84,6 @@
             {% endfor %}
             </tbody>
         </table>
-        </p>
     {% else %}
         <p class="lead">К сожалению, вы не прошли в плей-офф</p>
     {% endif %}

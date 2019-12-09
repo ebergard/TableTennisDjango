@@ -6,7 +6,7 @@
 {% if p %}
     {% if p.drawn_number %}
         <h3 class="cover-heading">Мои игры:</h3>
-        <p>
+
         <table class="table table-dark">
             <tbody>
             {% for g in games %}
@@ -76,7 +76,6 @@
             {% endfor %}
             </tbody>
         </table>
-        </p>
     {% else %}
         <p class="lead">После жеребьёвки здесь будут отображены ваши предстоящие игры</p>
     {% endif %}

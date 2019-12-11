@@ -20,7 +20,7 @@ def index(request):
     status_msg = {
         0: "Открыта регистрация на турнир",
         1: "Регистрация на турнир завершена",
-        2: "Групповой этап",
+        2: "Отборочный этап",
         3: "Плей-офф",
         4: "Турнир завершён.",
         5: "Нет данных о турнирах",
@@ -147,6 +147,11 @@ def playoff(request):
 
 
 def account_register(request):
+    tournament = get_current_tournament()
+    if tournament:
+        tournament_status = tournament.get_status()
+    else:
+        tournament_status = 5
 
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
@@ -165,6 +170,11 @@ def account_register(request):
 
 
 def account_login(request):
+    tournament = get_current_tournament()
+    if tournament:
+        tournament_status = tournament.get_status()
+    else:
+        tournament_status = 5
 
     if request.method == 'POST':
         form = AuthenticationForm(data=request.POST)

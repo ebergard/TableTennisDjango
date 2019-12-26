@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Ping-Pong AT{% endblock %}
 
@@ -33,6 +34,6 @@
     <p class="lead">
         Победители:
     </p>
-    <img src="static/images/1.jpg" width="1280" height="960" />
+    <img src="{% static "images/1.jpg"%}" width="1280" height="960" />
 {% endif %}
 {% endblock %}

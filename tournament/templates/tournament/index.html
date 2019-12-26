@@ -29,4 +29,10 @@
         {{ tournament.description | safe }}
     </p>
 {% endif %}
+{% if tournament_status == 4 %}
+    <p class="lead">
+        Победители:
+    </p>
+    <img src="static/images/1.jpg" width="1280" height="960" />
+{% endif %}
 {% endblock %}
